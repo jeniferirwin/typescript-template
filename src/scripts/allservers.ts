@@ -5,6 +5,7 @@ export function main(ns: NS): void {
   for (var server of servers.values()) {
     putBundle(ns, server);
   }
+  startBotNet(ns, servers);
 }
 
 export function getAllServers(ns: NS): Map<string, Server> {
@@ -46,7 +47,7 @@ export function putBundle(ns: NS, server: Server): boolean {
   return true;
 }
 
-export function startBotNet(ns: NS, servers: Map<string, Server>): boolean {
+export function startBotNet(ns: NS, servers: Map<string, Server>): void {
   for (var server of servers.values()) {
     if (server.hasAdminRights && !server.purchasedByPlayer) {
       ns.exec("scripts/AttackAnalysis.js", server.hostname);
