@@ -40,7 +40,7 @@ export class AttackAnalysis {
   getMoneyPercent() {
     var available = this.ns.getServerMoneyAvailable(this.target.hostname);
     var max = this.ns.getServerMaxMoney(this.target.hostname);
-    this.ns.tprint(`[${this.target.hostname}] Money: ${available} of ${max}`);
+    // this.ns.tprint(`[${this.target.hostname}] Money: ${available} of ${max}`);
     return available / max * 100;
   }
 

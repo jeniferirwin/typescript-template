@@ -50,7 +50,7 @@ export function putBundle(ns: NS, server: Server): boolean {
 export function startBotNet(ns: NS, servers: Map<string, Server>): void {
   const script = "scripts/AttackAnalysis.js";
   for (var server of servers.values()) {
-    var hasRam: boolean = (server.maxRam - server.ramUsed) > ns.getScriptRam(script, server.hostname);
+    var hasRam: boolean = server.maxRam > 16;
     if (server.hasAdminRights && hasRam && !server.purchasedByPlayer) {
       ns.killall(server.hostname);
       ns.exec(script, server.hostname);
