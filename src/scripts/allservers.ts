@@ -50,9 +50,9 @@ export function putBundle(ns: NS, server: Server): boolean {
 export function startBotNet(ns: NS, servers: Map<string, Server>): void {
   const script = "scripts/AttackAnalysis.js";
   for (var server of servers.values()) {
+    ns.killall(server.hostname);
     var hasRam: boolean = server.maxRam > 16;
     if (server.hasAdminRights && hasRam && !server.purchasedByPlayer) {
-      ns.killall(server.hostname);
       ns.exec(script, server.hostname);
       continue;
     } else if (!hasRam) {
@@ -65,7 +65,6 @@ export function startBotNet(ns: NS, servers: Map<string, Server>): void {
       crackPorts(ns, server);
       if (canNuke(server)) {
         ns.nuke(server.hostname);
-        ns.killall(server.hostname);
         ns.exec(script, server.hostname);
       }
     }
