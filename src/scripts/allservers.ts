@@ -45,3 +45,70 @@ export function putBundle(ns: NS, server: Server): boolean {
   ns.tprint(`Bundle transferred to ${server.hostname}.`);
   return true;
 }
+
+export function startBotNet(ns: NS, servers: Map<string, Server>): boolean {
+  for (var server of servers.values()) {
+    if (server.hasAdminRights) {
+      ns.exec("scripts/AttackAnalysis.js", server.hostname);
+      continue;
+    }
+    if (!canCrackPorts(server)) {
+      continue;
+    } else {
+      crackPorts(ns, server);
+      if (canNuke(server)) {
+        ns.nuke(server.hostname);
+        ns.exec("scripts/AttackAnalysis.js", server.hostname);
+      }
+    }
+  }
+}
+
+export function crackPorts(ns: NS, server: Server): boolean {
+  if (!canCrackPorts(server)) {
+    return false;
+  }
+  var anyCracked = false;
+  if (!server.ftpPortOpen && ns.ftpcrack(server.hostname)) {
+    anyCracked = true;
+  }
+  if (!server.sqlPortOpen && ns.sqlinject(server.hostname)) {
+    anyCracked = true;
+  }
+  if (!server.sshPortOpen && ns.brutessh(server.hostname)) {
+    anyCracked = true;
+  }
+  if (!server.httpPortOpen && ns.httpworm(server.hostname)) {
+    anyCracked = true;
+  }
+  if (!server.smtpPortOpen && ns.relaysmtp(server.hostname)) {
+    anyCracked = true;
+  }
+  return anyCracked;
+}
+
+export function canCrackPorts(server: Server): boolean {
+  var reqPorts = server.numOpenPortsRequired;
+  var curPorts = server.openPortCount;
+  if (reqPorts === undefined || curPorts === undefined) {
+    return false;
+  }
+  return true;
+}
+
+export function canNuke(server: Server): boolean {
+  var reqPorts = server.numOpenPortsRequired;
+  var curPorts = server.openPortCount;
+  if (reqPorts === undefined || curPorts === undefined || curPorts < reqPorts) {
+      return false;
+  }
+  return true;
+}
+
+export function haveSkill(ns: NS, server: Server): boolean {
+  var skill = server.requiredHackingSkill;
+  if (skill === undefined || skill > ns.getPlayer().skills.hacking) {
+      return false;
+  }
+  return true;
+}
