@@ -2,6 +2,9 @@ import { NS, Server } from "@ns";
 
 export function main(ns: NS): void {
   var servers = getAllServers(ns);
+  for (var server of servers.values()) {
+    putBundle(ns, server);
+  }
 }
 
 export function getAllServers(ns: NS): Map<string, Server> {
@@ -39,5 +42,6 @@ export function putBundle(ns: NS, server: Server): boolean {
     ns.tprint(`Bundle transfer to ${server.hostname} failed: ${error}`);
     return false;
   }
+  ns.tprint(`Bundle transferred to ${server.hostname}.`);
   return true;
 }
