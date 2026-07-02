@@ -48,7 +48,7 @@ export function putBundle(ns: NS, server: Server): boolean {
 
 export function startBotNet(ns: NS, servers: Map<string, Server>): boolean {
   for (var server of servers.values()) {
-    if (server.hasAdminRights) {
+    if (server.hasAdminRights && !server.purchasedByPlayer) {
       ns.exec("scripts/AttackAnalysis.js", server.hostname);
       continue;
     }
