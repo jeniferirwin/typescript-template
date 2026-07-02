@@ -48,25 +48,32 @@ export function putBundle(ns: NS, server: Server): boolean {
 }
 
 export function startBotNet(ns: NS, servers: Map<string, Server>): void {
+  const script = "scripts/AttackAnalysis.js";
   for (var server of servers.values()) {
-    if (server.hasAdminRights && !server.purchasedByPlayer) {
-      ns.exec("scripts/AttackAnalysis.js", server.hostname);
+    var hasRam: boolean = (server.maxRam - server.ramUsed) > ns.getScriptRam(script, server.hostname);
+    if (server.hasAdminRights && hasRam && !server.purchasedByPlayer) {
+      ns.killall(server.hostname);
+      ns.exec(script, server.hostname);
+      continue;
+    } else if (!hasRam) {
+      ns.tprint(`Not enough RAM on ${server.hostname} to start attack`);
       continue;
     }
-    if (!canCrackPorts(server)) {
+    if (!canCrackPorts(ns, server)) {
       continue;
     } else {
       crackPorts(ns, server);
       if (canNuke(server)) {
         ns.nuke(server.hostname);
-        ns.exec("scripts/AttackAnalysis.js", server.hostname);
+        ns.killall(server.hostname);
+        ns.exec(script, server.hostname);
       }
     }
   }
 }
 
 export function crackPorts(ns: NS, server: Server): boolean {
-  if (!canCrackPorts(server)) {
+  if (!canCrackPorts(ns, server)) {
     return false;
   }
   var anyCracked = false;
@@ -88,10 +95,11 @@ export function crackPorts(ns: NS, server: Server): boolean {
   return anyCracked;
 }
 
-export function canCrackPorts(server: Server): boolean {
+export function canCrackPorts(ns: NS, server: Server): boolean {
   var reqPorts = server.numOpenPortsRequired;
   var curPorts = server.openPortCount;
   if (reqPorts === undefined || curPorts === undefined) {
+    ns.tprint(`Ports on ${server.hostname} are undefined, cannot crack`);
     return false;
   }
   return true;
@@ -101,7 +109,7 @@ export function canNuke(server: Server): boolean {
   var reqPorts = server.numOpenPortsRequired;
   var curPorts = server.openPortCount;
   if (reqPorts === undefined || curPorts === undefined || curPorts < reqPorts) {
-      return false;
+    return false;
   }
   return true;
 }
@@ -109,6 +117,7 @@ export function canNuke(server: Server): boolean {
 export function haveSkill(ns: NS, server: Server): boolean {
   var skill = server.requiredHackingSkill;
   if (skill === undefined || skill > ns.getPlayer().skills.hacking) {
+      ns.tprint(`[${server.hostname}] SKILL ISSUE: ${ns.getPlayer().skills.hacking} vs. ${server.requiredHackingSkill}`)
       return false;
   }
   return true;
