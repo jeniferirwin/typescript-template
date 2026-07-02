@@ -81,7 +81,7 @@ export class AttackAnalysis {
     var maxThreads = Math.floor(ram_avail / ram_needed);
     var part = this.ns.hackAnalyze(this.target.hostname);
     var cap = Math.floor(0.5 / part);
-    this.ns.tprint(`Part: ${part} Max threads in RAM: ${maxThreads} Capped: ${cap}`);
+    // this.ns.tprint(`Part: ${part} Max threads in RAM: ${maxThreads} Capped: ${cap}`);
     if (cap < maxThreads) {
       return(cap);
     } else {
@@ -94,7 +94,7 @@ export class AttackAnalysis {
     var pct = this.getMoneyPercent();
     var growTime = this.ns.getGrowTime(this.target.hostname);
     var weakenTime = this.ns.getWeakenTime(this.target.hostname);
-    this.ns.tprint(`[${this.target.hostname}] Diff: ${diff} Pct: ${pct} Grow: ${growTime} Weaken: ${weakenTime}`);
+    // this.ns.tprint(`[${this.target.hostname}] Diff: ${diff} Pct: ${pct} Grow: ${growTime} Weaken: ${weakenTime}`);
     if (diff > 1) {
       return("weaken");
     }
@@ -118,15 +118,12 @@ export async function main(ns: NS, target: string = ns.getHostname(), attacker: 
     }
     switch (controller.getNextMove()) {
       case "weaken":
-        ns.tprint("running weaken");
         pid = ns.run(controller.weaken_script, controller.getWeakenThreadCount(), target);
         break;
       case "grow":
-        ns.tprint("running grow");
         pid = ns.run(controller.grow_script, controller.getGrowThreadCount(), target);
         break;
       case "hack":
-        ns.tprint("running hack");
         pid = ns.run(controller.hack_script, controller.getHackThreadCount(), target);
         break;
     }

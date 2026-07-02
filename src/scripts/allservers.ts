@@ -1,38 +1,33 @@
 import { NS, Server } from "@ns";
 
-export function getAllServers(ns: NS) {
-  // const bundle = ["scripts/cloud.ts", "scripts/allservers.ts", "scripts/AttackAnalysis.ts", "scripts/atk_grow.ts", "scripts/atk_weaken.ts", "scripts/atk_hack.ts"];
+export function main(ns: NS): void {
+  var servers = getAllServers(ns);
+}
+
+export function getAllServers(ns: NS): Map<string, Server> {
   ns.ui.clearTerminal();
-  var servers = new Set<Server>();
-  servers.add(ns.getServer());
-  var added = true;
-  while (added == true) {
-    for (var server of servers) {
-      added = false;
-      var results = ns.scan(server.hostname);
-      for (var result of results) {
-        var found = ns.getServer(result);
-        if (servers.has(found)) {
-          ns.tprint(`Server '${result}' already exists in set, not adding`);
-          continue;
-        }
-        ns.tprint(`Adding server '${result}' to set.`);
-        added = true;
-        servers.add(found);
-      }
+  var servers = new Map<string, Server>();
+  var current = ns.getServer();
+  servers.set(current.hostname, current);
+  for (var server of servers.values()) {
+    var results = ns.scan(server.hostname);
+    for (var result of results) {
+      var found = ns.getServer(result);
+      if (!servers.has(found.hostname)) {
+        servers.set(found.hostname, found);
+      } 
     }
   }
   for (var cloudServer of ns.cloud.getServerNames()) {
-    servers.add(ns.getServer(cloudServer));
+    servers.set(cloudServer, ns.getServer(cloudServer));
   }
+  return servers;
 }
 
 export function putBundle(ns: NS, server: Server): boolean {
   if (server.hostname === "home") {
-    ns.tprint("skipping home");
     return false;
   }
-  return true;
   try {
     const bundle = ns.ls("home", "scripts");
     for (var file of bundle) {
