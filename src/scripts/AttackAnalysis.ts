@@ -1,3 +1,5 @@
+import {NS, Server} from "@ns";
+
 export class AttackAnalysis {
   ns: NS;
   attacker_hostname!: string;

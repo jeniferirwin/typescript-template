@@ -1,3 +1,5 @@
+import { NS, Server } from "@ns";
+
 export function getAllServers(ns: NS) {
   // const bundle = ["scripts/cloud.ts", "scripts/allservers.ts", "scripts/AttackAnalysis.ts", "scripts/atk_grow.ts", "scripts/atk_weaken.ts", "scripts/atk_hack.ts"];
   ns.ui.clearTerminal();
