@@ -51,7 +51,7 @@ export function startBotNet(ns: NS, servers: Map<string, Server>): void {
   const script = "scripts/AttackAnalysis.js";
   for (var server of servers.values()) {
     ns.killall(server.hostname);
-    var hasRam: boolean = server.maxRam > 16;
+    var hasRam: boolean = server.maxRam >= 16;
     if (server.hasAdminRights && hasRam && !server.purchasedByPlayer) {
       ns.exec(script, server.hostname);
       continue;
