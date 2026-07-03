@@ -102,7 +102,10 @@ export class AttackAnalysis {
     if (pct < 55) {
       return("grow");
     }
-    return("hack");
+    if (this.ns.getHackingLevel() >= this.ns.getServerRequiredHackingLevel(this.target.hostname)) {
+      return("hack");
+    }
+    return("wait");
   }
 }
 
@@ -127,6 +130,8 @@ export async function main(ns: NS, target: string = ns.getHostname(), attacker: 
       case "hack":
         pid = ns.run(controller.hack_script, controller.getHackThreadCount(), target);
         break;
+      case "wait":
+        await ns.sleep(10000);
     }
     await ns.sleep(1000);
   }

@@ -1,4 +1,5 @@
 import { NS, Server } from "@ns";
+import { startShareScript } from "./libserver.js";
 
 export function main(ns: NS): void {
   var servers = getAllServers(ns);
@@ -48,25 +49,32 @@ export function putBundle(ns: NS, server: Server): boolean {
 }
 
 export function startBotNet(ns: NS, servers: Map<string, Server>): void {
-  const script = "scripts/AttackAnalysis.js";
+  const attackScript = "scripts/AttackAnalysis.js";
   for (var server of servers.values()) {
     ns.killall(server.hostname);
-    var hasRam: boolean = server.maxRam >= 16;
-    if (server.hasAdminRights && hasRam && !server.purchasedByPlayer) {
-      ns.exec(script, server.hostname);
-      continue;
-    } else if (!hasRam) {
-      ns.tprint(`Not enough RAM on ${server.hostname} to start attack`);
+    if (server.purchasedByPlayer) {
+      startShareScript(ns, server.hostname);
       continue;
     }
-    if (!canCrackPorts(ns, server)) {
-      continue;
-    } else {
+    if (!server.hasAdminRights && canCrackPorts(ns, server)) {
       crackPorts(ns, server);
       if (canNuke(server)) {
         ns.nuke(server.hostname);
-        ns.exec(script, server.hostname);
       }
+    }
+    if (server.hasAdminRights && ns.getServerMaxRam(server.hostname) >= 16 && !server.purchasedByPlayer) {
+      ns.exec(attackScript, server.hostname);
+      continue;
+    }
+    if (server.hasAdminRights && ns.getServerMaxRam(server.hostname) >= 4 && !server.purchasedByPlayer) {
+      startShareScript(ns, server.hostname);
+      continue;
+    }
+    if (server.hasAdminRights) {
+      var ram = ns.getServerMaxRam(server.hostname);
+      ns.tprint(`[${server.hostname}] Skipped due to RAM constraints: ${ram}`);
+    } else {
+      ns.tprint(`[${server.hostname}] Skipped due to lack of admin rights`);
     }
   }
 }
