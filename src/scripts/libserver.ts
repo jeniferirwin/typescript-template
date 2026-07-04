@@ -37,9 +37,33 @@ export function startShareScript(ns: NS, hostname: string) {
     var ram = ns.getServerMaxRam(hostname);
     if (ram !== undefined) {
         var threads = ram / ns.getScriptRam(shareScript, hostname);
-        if (threads > 0) {
-            ns.tprint("[${hostname}] Starting sharing script with ${threads} threads.");
+        if (threads !== undefined && threads > 0) {
+            ns.tprint(`[${hostname}] Starting sharing script with ${threads} threads.`);
             ns.exec(shareScript, hostname, threads);
         }
     }
+}
+
+export function getAllServers(ns: NS): Map<string, Server> {
+  ns.ui.clearTerminal();
+  var servers = new Map<string, Server>();
+  servers.set("home", ns.getServer("home"));
+  var changed = true;
+  while (changed === true) {
+    changed = false;
+    for (var server of servers.values()) {
+        var results = ns.scan(server.hostname);
+        for (var result of results) {
+            var found = ns.getServer(result);
+            if (!servers.has(found.hostname)) {
+                servers.set(found.hostname, found);
+                changed = true;
+            } 
+        }
+    }
+  }
+  for (var cloudServer of ns.cloud.getServerNames()) {
+    servers.set(cloudServer, ns.getServer(cloudServer));
+  }
+  return servers;
 }

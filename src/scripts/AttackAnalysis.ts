@@ -11,7 +11,7 @@ export class AttackAnalysis {
   grow_script!: string;
   hack_script!: string;
 
-  constructor(ns: NS, target_hostname: string = ns.getHostname(), attacker_hostname: string = ns.getHostname(), weaken_script: string = "scripts/atk_weaken.ts", grow_script: string = "scripts/atk_grow.ts", hack_script: string = "scripts/atk_hack.ts") {
+  constructor(ns: NS, target_hostname: string = ns.getHostname(), attacker_hostname: string = ns.getHostname(), weaken_script: string = "scripts/atk_weaken.js", grow_script: string = "scripts/atk_grow.js", hack_script: string = "scripts/atk_hack.js") {
     this.ns = ns;
     this.target_hostname = target_hostname;
     this.attacker_hostname = attacker_hostname;
@@ -28,7 +28,6 @@ export class AttackAnalysis {
 
     const scripts = [this.weaken_script, this.grow_script, this.hack_script];
     for (var fn of scripts) {
-      ns.tprint(fn);
       if (!this.ns.fileExists(fn, this.attacker_hostname)) {
         throw new Error((`[${this.attacker_hostname}] Script missing: ${fn}`));
       }

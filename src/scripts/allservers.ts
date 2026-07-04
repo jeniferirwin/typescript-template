@@ -1,5 +1,5 @@
 import { NS, Server } from "@ns";
-import { startShareScript } from "./libserver.js";
+import { getAllServers, startShareScript } from "./libserver.js";
 
 export function main(ns: NS): void {
   var servers = getAllServers(ns);
@@ -7,26 +7,6 @@ export function main(ns: NS): void {
     putBundle(ns, server);
   }
   startBotNet(ns, servers);
-}
-
-export function getAllServers(ns: NS): Map<string, Server> {
-  ns.ui.clearTerminal();
-  var servers = new Map<string, Server>();
-  var current = ns.getServer();
-  servers.set(current.hostname, current);
-  for (var server of servers.values()) {
-    var results = ns.scan(server.hostname);
-    for (var result of results) {
-      var found = ns.getServer(result);
-      if (!servers.has(found.hostname)) {
-        servers.set(found.hostname, found);
-      } 
-    }
-  }
-  for (var cloudServer of ns.cloud.getServerNames()) {
-    servers.set(cloudServer, ns.getServer(cloudServer));
-  }
-  return servers;
 }
 
 export function putBundle(ns: NS, server: Server): boolean {
@@ -52,9 +32,13 @@ export function startBotNet(ns: NS, servers: Map<string, Server>): void {
   const attackScript = "scripts/AttackAnalysis.js";
   for (var server of servers.values()) {
     ns.killall(server.hostname);
+    if (server.hostname === "home") {
+      ns.exec(attackScript, server.hostname, 1, "foodnstuff");
+      ns.exec("scripts/hacknet.js", server.hostname);
+      continue;
+    }
     if (server.purchasedByPlayer) {
       startShareScript(ns, server.hostname);
-      continue;
     }
     if (!server.hasAdminRights && canCrackPorts(ns, server)) {
       crackPorts(ns, server);
