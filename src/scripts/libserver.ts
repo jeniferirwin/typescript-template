@@ -1,4 +1,4 @@
-import {NS, Server} from "@ns";
+import {NS, ProcessInfo, Server} from "@ns";
 
 export function getServerFreeRam(ns: NS, hostname: string): number | undefined {
     if (ns.serverExists(hostname) && ns.hasRootAccess(hostname)) {
@@ -66,4 +66,13 @@ export function getAllServers(ns: NS): Map<string, Server> {
     servers.set(cloudServer, ns.getServer(cloudServer));
   }
   return servers;
+}
+
+export function getAllProcesses(ns: NS): Map<string, ProcessInfo[]> {
+    var servers = getAllServers(ns);
+    var pids = new Map<string, ProcessInfo[]>;
+    for (var server of servers.values()) {
+        pids.set(server.hostname, ns.ps(server.hostname));
+    }
+    return pids;
 }
