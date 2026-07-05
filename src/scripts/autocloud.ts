@@ -1,5 +1,5 @@
 import {NS} from "@ns";
-import { putBundle } from "./allservers";
+import { putBundle } from "./libserver";
 
 enum Targets {
     "n00dles",
