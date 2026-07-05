@@ -34,9 +34,12 @@ export function startBotNet(ns: NS, servers: Map<string, Server>): void {
     ns.tprint(`[${server.hostname}]`);
     ns.killall(server.hostname);
     if (server.hostname === "home") {
-      ns.exec("scripts/hacknet.js", server.hostname);
-      ns.exec("scripts/autocloud.js", server.hostname);
+      // ns.exec("scripts/hacknet.js", server.hostname);
+      ns.exec("scripts/autocloud.js", server.hostname, 1, "scripts");
       ns.exec(attackScript, server.hostname, 1, "foodnstuff");
+      continue;
+    }
+    if (server.purchasedByPlayer) {
       continue;
     }
     if (!server.hasAdminRights && canCrackPorts(ns, server)) {
@@ -45,12 +48,7 @@ export function startBotNet(ns: NS, servers: Map<string, Server>): void {
         ns.nuke(server.hostname);
       }
     }
-    if (server.hasAdminRights && ns.getServerMaxRam(server.hostname) >= 32 && !server.purchasedByPlayer) {
-      ns.exec(attackScript, server.hostname);
-      ns.tprint(`${server.hostname} starting attack script`);
-      continue;
-    }
-    if (server.hasAdminRights && ns.getServerMaxRam(server.hostname) >= 4 && !server.purchasedByPlayer) {
+    if (server.hasAdminRights && ns.getServerMaxRam(server.hostname) >= 4) {
       startShareScript(ns, server.hostname);
       ns.tprint(`${server.hostname} starting share script`);
       continue;

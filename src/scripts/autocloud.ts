@@ -19,7 +19,12 @@ enum Targets {
     "johnson-ortho",
     "the-hub",
     "computek",
-    "crush-fitness"
+    "crush-fitness",
+    "netlink",
+    "rothman-uni",
+    "catalyst",
+    "summit-uni",
+    "aevum-police"
 }
 
 enum CloudNames {
@@ -65,7 +70,6 @@ export async function main(ns: NS) {
                 ns.exec("scripts/AttackAnalysis.js", server, 1, Targets[i]);
                 i++;
             }
-            return;
         }
     }
     while (true) {
