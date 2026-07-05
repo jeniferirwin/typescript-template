@@ -4,41 +4,40 @@ import { getAllServers, startShareScript } from "./libserver.js";
 export function main(ns: NS): void {
   var servers = getAllServers(ns);
   for (var server of servers.values()) {
-    putBundle(ns, server);
+    putBundle(ns, server.hostname);
   }
   startBotNet(ns, servers);
 }
 
-export function putBundle(ns: NS, server: Server): boolean {
-  if (server.hostname === "home") {
+export function putBundle(ns: NS, hostname: string): boolean {
+  if (hostname === "home") {
     return false;
   }
   try {
     const bundle = ns.ls("home", "scripts");
     for (var file of bundle) {
-      ns.rm(file, server.hostname);
+      ns.rm(file, hostname);
     }
-    ns.scp(bundle, server.hostname);
+    ns.scp(bundle, hostname);
   }
   catch(error) {
-    ns.tprint(`Bundle transfer to ${server.hostname} failed: ${error}`);
+    ns.tprint(`Bundle transfer to ${hostname} failed: ${error}`);
     return false;
   }
-  ns.tprint(`Bundle transferred to ${server.hostname}.`);
+  ns.tprint(`Bundle transferred to ${hostname}.`);
   return true;
 }
 
 export function startBotNet(ns: NS, servers: Map<string, Server>): void {
   const attackScript = "scripts/AttackAnalysis.js";
   for (var server of servers.values()) {
+    ns.tprint(`[${server.hostname}]`);
     ns.killall(server.hostname);
     if (server.hostname === "home") {
-      ns.exec(attackScript, server.hostname, 1, "foodnstuff");
       ns.exec("scripts/hacknet.js", server.hostname);
+      ns.exec("scripts/autocloud.js", server.hostname);
+      ns.exec(attackScript, server.hostname, 1, "foodnstuff");
       continue;
-    }
-    if (server.purchasedByPlayer) {
-      startShareScript(ns, server.hostname);
     }
     if (!server.hasAdminRights && canCrackPorts(ns, server)) {
       crackPorts(ns, server);
@@ -46,12 +45,14 @@ export function startBotNet(ns: NS, servers: Map<string, Server>): void {
         ns.nuke(server.hostname);
       }
     }
-    if (server.hasAdminRights && ns.getServerMaxRam(server.hostname) >= 16 && !server.purchasedByPlayer) {
+    if (server.hasAdminRights && ns.getServerMaxRam(server.hostname) >= 32 && !server.purchasedByPlayer) {
       ns.exec(attackScript, server.hostname);
+      ns.tprint(`${server.hostname} starting attack script`);
       continue;
     }
     if (server.hasAdminRights && ns.getServerMaxRam(server.hostname) >= 4 && !server.purchasedByPlayer) {
       startShareScript(ns, server.hostname);
+      ns.tprint(`${server.hostname} starting share script`);
       continue;
     }
     if (server.hasAdminRights) {
