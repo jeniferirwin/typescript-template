@@ -65,9 +65,12 @@ export async function main(ns: NS) {
                 putBundle(ns, server);
                 ns.killall(server);
                 if (Targets[i] === undefined) {
-                    return;
+                    var ram = ns.getServerMaxRam(server);
+                    var threads = Math.floor(ram / ns.getScriptRam("scripts/sharing.js"));
+                    ns.exec("scripts/sharing.js", server, threads)
+                } else {
+                    ns.exec("scripts/AttackAnalysis.js", server, 1, Targets[i]);
                 }
-                ns.exec("scripts/AttackAnalysis.js", server, 1, Targets[i]);
                 i++;
             }
         }

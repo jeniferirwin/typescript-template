@@ -15,7 +15,7 @@ export function startBotNet(ns: NS, servers: Map<string, Server>): void {
     ns.tprint(`[${server.hostname}]`);
     ns.killall(server.hostname);
     if (server.hostname === "home") {
-      // ns.exec("scripts/hacknet.js", server.hostname);
+      ns.exec("scripts/hacknet.js", server.hostname);
       ns.exec("scripts/autocloud.js", server.hostname, 1, "scripts");
       ns.exec(attackScript, server.hostname, 1, "n00dles");
       continue;
