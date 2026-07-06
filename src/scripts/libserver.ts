@@ -1,5 +1,10 @@
 import {NS, ProcessInfo, Server} from "@ns";
 
+const script_hack = "scripts/atk_hack.js";
+const script_grow = "scripts/atk_grow.js";
+const script_weaken = "scripts/atk_weaken.js";
+const script_share = "scripts/sharing.js";
+
 export function getServerFreeRam(ns: NS, hostname: string): number | undefined {
     if (ns.serverExists(hostname) && ns.hasRootAccess(hostname)) {
         return ns.getServerMaxRam(hostname) - ns.getServerUsedRam(hostname);
@@ -9,8 +14,12 @@ export function getServerFreeRam(ns: NS, hostname: string): number | undefined {
 
 export function getGrowThreadCount(ns: NS, hostname: string): number | undefined {
     if (ns.serverExists(hostname) && ns.hasRootAccess(hostname)) {
-        var moneyDiffMult = ns.getServerMaxMoney(hostname) / ns.getServerMoneyAvailable(hostname);
-        return ns.growthAnalyze(hostname, moneyDiffMult);
+        var moneyAvailable = ns.getServerMoneyAvailable(hostname);
+        var moneyMax = ns.getServerMaxMoney(hostname);
+        var moneyDiffMult = moneyMax / moneyAvailable;
+        var threads = ns.growthAnalyze(hostname, moneyDiffMult);
+        ns.tprint(`[${hostname}] DiffMult: ${moneyDiffMult} (${moneyMax} / ${moneyAvailable}) Threads: ${threads}`);
+        return threads;
     }
     return undefined; 
 }
@@ -33,13 +42,12 @@ export function getWeakenThreadCount(ns: NS, hostname: string): number | undefin
 }
 
 export function startShareScript(ns: NS, hostname: string) {
-    const shareScript = "scripts/sharing.js";
     var ram = ns.getServerMaxRam(hostname);
     if (ram !== undefined) {
-        var threads = ram / ns.getScriptRam(shareScript, hostname);
+        var threads = ram / ns.getScriptRam(script_share, hostname);
         if (threads !== undefined && threads > 0) {
             ns.tprint(`[${hostname}] Starting sharing script with ${threads} threads.`);
-            ns.exec(shareScript, hostname, threads);
+            ns.exec(script_share, hostname, threads);
         }
     }
 }
@@ -55,6 +63,7 @@ export function getAllServers(ns: NS): Map<string, Server> {
         var results = ns.scan(server.hostname);
         for (var result of results) {
             var found = ns.getServer(result);
+            ns.tprint(`found ${found.hostname} attached to ${server.hostname}`);
             if (!servers.has(found.hostname)) {
                 servers.set(found.hostname, found);
                 changed = true;
@@ -78,7 +87,7 @@ export function getAllProcesses(ns: NS): Map<string, ProcessInfo[]> {
 }
 
 export function crackPorts(ns: NS, server: Server): boolean {
-  if (!canCrackPorts(ns, server)) {
+  if (!canCrackPorts(ns, server.hostname)) {
     return false;
   }
   var anyCracked = false;
@@ -100,11 +109,10 @@ export function crackPorts(ns: NS, server: Server): boolean {
   return anyCracked;
 }
 
-export function canCrackPorts(ns: NS, server: Server): boolean {
-  var reqPorts = server.numOpenPortsRequired;
-  var curPorts = server.openPortCount;
-  if (reqPorts === undefined || curPorts === undefined) {
-    ns.tprint(`Ports on ${server.hostname} are undefined, cannot crack`);
+export function canCrackPorts(ns: NS, hostname: string): boolean {
+  var reqPorts = ns.getServerNumPortsRequired(hostname);
+  if (reqPorts === undefined) {
+    ns.tprint(`Ports on ${hostname} are undefined, cannot crack`);
     return false;
   }
   return true;
