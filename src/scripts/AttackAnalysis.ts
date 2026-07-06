@@ -121,12 +121,21 @@ export async function main(ns: NS, target: string = ns.getHostname(), attacker: 
     }
     switch (controller.getNextMove()) {
       case "weaken":
+        if (controller.getWeakenThreadCount() <= 0) {
+          break;
+        }
         pid = ns.run(controller.weaken_script, controller.getWeakenThreadCount(), target);
         break;
       case "grow":
+        if (controller.getGrowThreadCount() <= 0) {
+          break;
+        }
         pid = ns.run(controller.grow_script, controller.getGrowThreadCount(), target);
         break;
       case "hack":
+        if (controller.getHackThreadCount() <= 0) {
+          break;
+        }
         pid = ns.run(controller.hack_script, controller.getHackThreadCount(), target);
         break;
       case "wait":
