@@ -64,6 +64,10 @@ export async function main(ns: NS) {
             for (var server of servers) {
                 putBundle(ns, server);
                 ns.killall(server);
+                var ram = ns.getServerMaxRam(server);
+                var threads = Math.floor(ram / ns.getScriptRam("scripts/sharing.js"));
+                ns.exec("scripts/sharing.js", server, threads)
+                /*
                 if (Targets[i] === undefined) {
                     var ram = ns.getServerMaxRam(server);
                     var threads = Math.floor(ram / ns.getScriptRam("scripts/sharing.js"));
@@ -71,6 +75,7 @@ export async function main(ns: NS) {
                 } else {
                     ns.exec("scripts/AttackAnalysis.js", server, 1, Targets[i]);
                 }
+                */
                 i++;
             }
         }
@@ -87,12 +92,15 @@ export async function main(ns: NS) {
         }
         for (var server of servers) {
             var nextTier = tiers.indexOf(ns.getServerMaxRam(server)) + 1;
-            if (nextTier <= tiers.length) {
+            if (nextTier < tiers.length) {
                 var cost = ns.cloud.getServerUpgradeCost(server, tiers[nextTier]);
                 var ram = tiers[nextTier];
                 if (cost <= ns.getPlayer().money / servers.length) {
                     ns.cloud.upgradeServer(server, tiers[nextTier]);
                     ns.tprint(`Upgraded ${server} to ${ram} for ${cost}`);
+                    ns.killall();
+                    var threads = Math.floor(tiers[nextTier] / ns.getScriptRam("scripts/sharing.js"));
+                    ns.exec("scripts/sharing.js", server, threads)
                 }   
             }
         }

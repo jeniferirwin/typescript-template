@@ -29,9 +29,8 @@ export function startBotNet(ns: NS, servers: Map<string, Server>): void {
       continue;
     }
   }
-  ns.exec("scripts/hacknet.js", "home");
   for (var hostname of getAllServers(ns).keys()) {
-    if (hostname !== "home" && ns.getServerMaxMoney(hostname) > 0 && ns.getServerRequiredHackingLevel() < ns.getPlayer().skills.hacking * 0.30) {
+    if (hostname !== "home" && ns.hasRootAccess(hostname) && ns.getServerMaxMoney(hostname) > 0 && ns.getServerRequiredHackingLevel() < ns.getPlayer().skills.hacking * 0.30) {
       ns.exec(attackScript, "home", 1, hostname);
     }
   }

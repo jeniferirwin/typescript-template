@@ -63,11 +63,14 @@ export class AttackAnalysis {
   }
 
   getGrowThreadCount() {
-    var multNeeded = this.ns.getServerMaxMoney(this.target.hostname) / this.ns.getServerMoneyAvailable(this.target.hostname);
-    var threads = Math.ceil(this.ns.growthAnalyze(this.target.hostname, multNeeded));
     var ram_needed = this.ns.getScriptRam(this.grow_script, this.attacker.hostname);
     var ram_avail = this.ns.getServerMaxRam(this.attacker.hostname) - this.ns.getServerUsedRam(this.attacker.hostname);
     var maxThreads = Math.floor(ram_avail / ram_needed);
+    var multNeeded = this.ns.getServerMaxMoney(this.target.hostname) / this.ns.getServerMoneyAvailable(this.target.hostname);
+    if (multNeeded >= Infinity) {
+      return maxThreads;
+    }
+    var threads = Math.ceil(this.ns.growthAnalyze(this.target.hostname, multNeeded));
     if (threads < maxThreads) {
       return threads;
     } else {

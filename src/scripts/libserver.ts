@@ -52,8 +52,33 @@ export function startShareScript(ns: NS, hostname: string) {
     }
 }
 
+export function getServerLinks(ns: NS) {
+    var links = new Map<string, Array<string>>();
+    for (var server of getAllServers(ns).values()) {
+        if (!links.has(server.hostname)) {
+            var children = new Array<string>;
+            for (var child of ns.scan(server.hostname)) {
+                if (!links.has(child)) {
+                    children.push(child);
+                }
+            }
+            links.set(server.hostname, children);
+        }
+    }
+    return links;
+}
+
+export function getParentServer(ns: NS, hostname: string): string | undefined {
+    var links = getServerLinks(ns);
+    for (var parent of links.keys()) {
+        if (links.get(parent)?.findIndex(x => x === hostname) !== -1) {
+            return parent;
+        }
+    }
+    return undefined;
+}
+
 export function getAllServers(ns: NS): Map<string, Server> {
-  ns.ui.clearTerminal();
   var servers = new Map<string, Server>();
   servers.set("home", ns.getServer("home"));
   var changed = true;
@@ -63,7 +88,6 @@ export function getAllServers(ns: NS): Map<string, Server> {
         var results = ns.scan(server.hostname);
         for (var result of results) {
             var found = ns.getServer(result);
-            ns.tprint(`found ${found.hostname} attached to ${server.hostname}`);
             if (!servers.has(found.hostname)) {
                 servers.set(found.hostname, found);
                 changed = true;
