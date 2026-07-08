@@ -78,39 +78,50 @@ export function getParentServer(ns: NS, hostname: string): string | undefined {
     return undefined;
 }
 
-export function getAllServers(ns: NS): Map<string, Server> {
-  var servers = new Map<string, Server>();
-  servers.set("home", ns.getServer("home"));
+export function getAllServerNames(ns: NS) {
+  var servers = new Array<string>();
+  servers.push("home");
   var changed = true;
   while (changed === true) {
     changed = false;
     for (var server of servers.values()) {
-        var results = ns.scan(server.hostname);
+        var results = ns.scan(server);
         for (var result of results) {
-            var found = ns.getServer(result);
-            if (!servers.has(found.hostname)) {
-                servers.set(found.hostname, found);
-                changed = true;
+            if (servers.indexOf(result) < 0) {
+              servers.push(result);
+              changed = true;
             } 
         }
     }
   }
   for (var cloudServer of ns.cloud.getServerNames()) {
-    servers.set(cloudServer, ns.getServer(cloudServer));
+    servers.push(cloudServer);
+  }
+  return servers;
+}
+
+export function getAllServers(ns: NS): Map<string, Server> {
+  var servers = new Map<string, Server>();
+  var names = getAllServerNames(ns);
+  for (var name in names) {
+    servers.set(name, ns.getServer(name));
   }
   return servers;
 }
 
 export function getAllProcesses(ns: NS): Map<string, ProcessInfo[]> {
-    var servers = getAllServers(ns);
+    var servers = getAllServerNames(ns);
     var pids = new Map<string, ProcessInfo[]>;
     for (var server of servers.values()) {
-        pids.set(server.hostname, ns.ps(server.hostname));
+        pids.set(server, ns.ps(server));
     }
     return pids;
 }
 
 export function crackPorts(ns: NS, server: Server): boolean {
+  if (server.openPortCount == 5) {
+    return true;
+  }
   if (!canCrackPorts(ns, server.hostname)) {
     return false;
   }

@@ -1,19 +1,20 @@
-import { NS, Server } from "@ns";
-import { getAllServers, startShareScript, canNuke, canCrackPorts, crackPorts, putBundle } from "./libserver.js";
+import { NS } from "@ns";
+import { getAllServerNames, startShareScript, canNuke, canCrackPorts, crackPorts, putBundle } from "./libserver.js";
 
 export function main(ns: NS): void {
-  var servers = getAllServers(ns);
-  for (var server of servers.values()) {
-    putBundle(ns, server.hostname);
+  var servers = getAllServerNames(ns);
+  for (var server of servers) {
+    putBundle(ns, server);
   }
   startBotNet(ns, servers);
 }
 
-export function startBotNet(ns: NS, servers: Map<string, Server>): void {
+export function startBotNet(ns: NS, hostnames: Array<string>): void {
   const attackScript = "scripts/AttackAnalysis.js";
-  for (var server of servers.values()) {
-    ns.tprint(`[${server.hostname}] ${server.maxRam} ${server.cpuCores}`);
-    ns.killall(server.hostname);
+  for (var hostname of hostnames) {
+    var server = ns.getServer(hostname);
+    ns.killall(hostname);
+    ns.tprint(`${hostname}`)
     if (server.purchasedByPlayer) {
       continue;
     }
@@ -25,12 +26,9 @@ export function startBotNet(ns: NS, servers: Map<string, Server>): void {
     }
     if (server.hasAdminRights && ns.getServerMaxRam(server.hostname) > 2) {
       startShareScript(ns, server.hostname);
-      ns.tprint(`${server.hostname} starting share script`);
-      continue;
     }
-  }
-  for (var hostname of getAllServers(ns).keys()) {
-    if (hostname !== "home" && ns.hasRootAccess(hostname) && ns.getServerMaxMoney(hostname) > 0 && ns.getServerRequiredHackingLevel() < ns.getPlayer().skills.hacking * 0.30) {
+    var isHackable = server.hasAdminRights && server.moneyMax !== undefined && server.moneyMax > 0 && server.requiredHackingSkill !== undefined && server.requiredHackingSkill <= ns.getPlayer().skills.hacking;
+    if (isHackable === true) {
       ns.exec(attackScript, "home", 1, hostname);
     }
   }
