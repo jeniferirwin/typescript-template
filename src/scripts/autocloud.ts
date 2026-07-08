@@ -87,7 +87,7 @@ export async function main(ns: NS) {
             if (ns.cloud.getServerCost(16) < ns.getPlayer().money * 0.10) {
                 var name = CloudNames[servers.length + 1];
                 ns.cloud.purchaseServer(name, 16);
-                ns.tprint(`Purchased cloud server ${name}`);
+                // ns.tprint(`Purchased cloud server ${name}`);
             }
         }
         for (var server of servers) {
@@ -97,8 +97,8 @@ export async function main(ns: NS) {
                 var ram = tiers[nextTier];
                 if (cost <= ns.getPlayer().money / servers.length) {
                     ns.cloud.upgradeServer(server, tiers[nextTier]);
-                    ns.tprint(`Upgraded ${server} to ${ram} for ${cost}`);
-                    ns.killall();
+                   // ns.tprint(`Upgraded ${server} to ${ram} for ${cost}`);
+                    ns.killall(server);
                     var threads = Math.floor(tiers[nextTier] / ns.getScriptRam("scripts/sharing.js"));
                     ns.exec("scripts/sharing.js", server, threads)
                 }   
