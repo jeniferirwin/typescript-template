@@ -15,7 +15,8 @@ export function startBotNet(ns: NS, hostnames: Array<string>): void {
     var server = ns.getServer(hostname);
     ns.killall(hostname);
     ns.tprint(`${hostname}`)
-    if (server.purchasedByPlayer) {
+    if (server.purchasedByPlayer && hostname !== "home") {
+      startShareScript(ns, server.hostname);
       continue;
     }
     if (!server.hasAdminRights && canCrackPorts(ns, server.hostname)) {
