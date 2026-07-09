@@ -1,5 +1,5 @@
 import {NS} from "@ns";
-import { getAllServers, getParentServer } from "./libserver";
+import { getAllServers, getParentServer } from "../libserver";
 
 export function main(ns: NS) {
     var servers = getAllServers(ns);

@@ -1,8 +1,9 @@
 import {NS} from "@ns";
-import { getAllServers } from "./libserver";
+import { getAllServers } from "../libserver";
 
 export function main(ns: NS) {
     var servers = getAllServers(ns);
+    ns.tprint(servers);
     for (var server of servers.values()) {
         var admin = server.hasAdminRights;
         var hackSkill = server.requiredHackingSkill;
