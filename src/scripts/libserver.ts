@@ -103,7 +103,7 @@ export function getAllServerNames(ns: NS) {
 export function getAllServers(ns: NS): Map<string, Server> {
   var servers = new Map<string, Server>();
   var names = getAllServerNames(ns);
-  for (var name in names) {
+  for (var name of names) {
     servers.set(name, ns.getServer(name));
   }
   return servers;
