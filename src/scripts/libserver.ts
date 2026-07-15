@@ -25,7 +25,7 @@ export function getGrowThreadCount(ns: NS, hostname: string): number | undefined
 }
 
 export function getSecurityDiff(ns: NS, hostname: string): number | undefined {
-    if (ns.serverExists(hostname) && ns.hasRootAccess(hostname)) {
+    if (ns.serverExists(hostname)) {
         return ns.getServerSecurityLevel(hostname) - ns.getServerMinSecurityLevel(hostname);
     }
     return undefined;
@@ -162,10 +162,9 @@ export function canNuke(server: Server): boolean {
   return true;
 }
 
-export function haveSkill(ns: NS, server: Server): boolean {
-  var skill = server.requiredHackingSkill;
+export function haveSkill(ns: NS, hostname: string): boolean {
+  var skill = ns.getServerRequiredHackingLevel(hostname);
   if (skill === undefined || skill > ns.getPlayer().skills.hacking) {
-      ns.tprint(`[${server.hostname}] SKILL ISSUE: ${ns.getPlayer().skills.hacking} vs. ${server.requiredHackingSkill}`)
       return false;
   }
   return true;
@@ -186,6 +185,20 @@ export function putBundle(ns: NS, hostname: string): boolean {
     ns.tprint(`Bundle transfer to ${hostname} failed: ${error}`);
     return false;
   }
-  ns.tprint(`Bundle transferred to ${hostname}.`);
   return true;
+}
+
+export function getAllGlobalRAM(ns: NS): Map<string, number> {
+    var data = new Map<string, number>();
+    var servers = getAllServerNames(ns);
+    for (var server of servers) {
+        var used = ns.getServerUsedRam(server);
+        var max = ns.getServerMaxRam(server);
+        if (used === undefined || max === undefined || max <= 0) {
+            continue;
+        }
+        var ram = max - used;
+        data.set(server, ram);
+    }
+    return data;
 }
