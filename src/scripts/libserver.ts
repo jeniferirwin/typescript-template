@@ -5,6 +5,16 @@ const script_grow = "scripts/atk_grow.js";
 const script_weaken = "scripts/atk_weaken.js";
 const script_share = "scripts/sharing.js";
 
+
+export function ListServerStats(ns: NS, server: Server) {
+  const listFormat = "%*s %*s";
+  const cols = 10;
+  var items = [];
+  items.push(cols, server.backdoorInstalled);
+  items.push(cols, server.baseDifficulty);
+  ns.sprintf(listFormat, items[0], items[1], items[2], items[3]);
+}
+
 export function getServerFreeRam(ns: NS, hostname: string): number | undefined {
     if (ns.serverExists(hostname) && ns.hasRootAccess(hostname)) {
         return ns.getServerMaxRam(hostname) - ns.getServerUsedRam(hostname);
